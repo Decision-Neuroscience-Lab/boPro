@@ -1,0 +1,125 @@
+\documentclass[12pt, oneside]{article}
+\usepackage{geometry}
+\usepackage{dcolumn}
+\usepackage{lipsum}
+\usepackage{textcomp}
+\usepackage{sfmath}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+%\usepackage{uarial}
+
+\renewcommand{\familydefault}{\sfdefault}
+\geometry{letterpaper}
+%\geometry{landscape}
+
+\begin{document}
+\pagenumbering{gobble}
+\begin{table}[!htbp] \centering
+\caption{Fixed effects panel regression estimates - Juice}
+\label{Juice}
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-3} }
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+& \multicolumn{1}{c}{\textit{Dependent variable:}} \\
+\cline{2-2}
+\\[-1.8ex] & \multicolumn{1}{c}{Response} \\
+\hline \\[-1.8ex]
+  Delay (6 seconds) & 1.017^{**}$ $(0.056) \\
+  Delay (8 seconds) & 1.864^{**}$ $(0.092) \\
+  Delay (10 seconds) & 2.829^{**}$ $(0.130) \\
+  Anticipated reward (small) & -0.021$ $(0.041) \\
+  Anticipated reward (medium) & -0.061$ $(0.033) \\
+  Anticipated reward (large) & -0.047$ $(0.054) \\
+  Previous reward (small) & 0.053^{*}$ $(0.024) \\
+  Previous reward (medium) & 0.090^{**}$ $(0.028) \\
+  Previous reward (large) & 0.100^{**}$ $(0.038) \\
+  Total volume & -0.0002$ $(0.0005) \\
+  Previous delay (6 seconds) & -0.064$ $(0.034) \\
+  Previous delay (8 seconds) & -0.115^{**}$ $(0.044) \\
+  Previous delay (10 seconds) & -0.172^{**}$ $(0.061) \\
+  Previous response & 0.100^{**}$ $(0.020) \\
+\hline \\[-1.8ex]
+Observations & \multicolumn{1}{c}{3,741} \\
+R$^{2}$ & \multicolumn{1}{c}{0.661} \\
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.654} \\
+\hline
+\hline \\[-1.8ex]
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.05; $^{**}$p$<$0.01} \\
+\end{tabular}
+\end{table}
+
+\newpage
+
+\pagenumbering{gobble}
+\begin{table}[!htbp] \centering
+\caption{Fixed effects panel regression estimates - Money}
+\label{Money}
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-3} }
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+& \multicolumn{1}{c}{\textit{Dependent variable:}} \\
+\cline{2-2}
+\\[-1.8ex] & \multicolumn{1}{c}{Response} \\
+\hline \\[-1.8ex]
+  Delay (6 seconds) & 0.948^{**}$ $(0.046) \\
+  Delay (8 seconds) & 1.851^{**}$ $(0.079) \\
+  Delay (10 seconds) & 2.805^{**}$ $(0.119) \\
+  Anticipated reward (small) & -0.008$ $(0.071) \\
+  Anticipated reward (medium) & 0.008$ $(0.094) \\
+  Anticipated reward (large) & 0.022$ $(0.101) \\
+  Previous reward (small) & 0.013$ $(0.032) \\
+  Previous reward (medium) & -0.029$ $(0.023) \\
+  Previous reward (large) & -0.009$ $(0.036) \\
+  Total volume & -0.00004$ $(0.00005) \\
+  Previous delay (6 seconds) & 0.050$ $(0.044) \\
+  Previous delay (8 seconds) & -0.025$ $(0.076) \\
+  Previous delay (10 seconds) & -0.141$ $(0.101) \\
+  Previous response & 0.102^{**}$ $(0.032) \\
+\hline \\[-1.8ex]
+Observations & \multicolumn{1}{c}{3,803} \\
+R$^{2}$ & \multicolumn{1}{c}{0.700} \\
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.693} \\
+\hline
+\hline \\[-1.8ex]
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.05; $^{**}$p$<$0.01} \\
+\end{tabular}
+\end{table}
+
+\newpage
+
+\pagenumbering{gobble}
+\begin{table}[!htbp] \centering
+\caption{Fixed effects panel regression estimates - Water}
+\label{Water}
+\begin{tabular}{@{\extracolsep{5pt}}lD{.}{.}{-3} }
+\\[-1.8ex]\hline
+\hline \\[-1.8ex]
+& \multicolumn{1}{c}{\textit{Dependent variable:}} \\
+\cline{2-2}
+\\[-1.8ex] & \multicolumn{1}{c}{Response} \\
+\hline \\[-1.8ex]
+  Delay (6 seconds) & 0.967^{**}$ $(0.062) \\
+  Delay (8 seconds) & 1.840^{**}$ $(0.100) \\
+  Delay (10 seconds) & 2.698^{**}$ $(0.139) \\
+  Anticipated reward (small) & 0.006$ $(0.030) \\
+  Anticipated reward (medium) & -0.029$ $(0.037) \\
+  Anticipated reward (large) & 0.006$ $(0.036) \\
+  Previous reward (small) & 0.006$ $(0.032) \\
+  Previous reward (medium) & 0.041$ $(0.043) \\
+  Previous reward (large) & 0.005$ $(0.031) \\
+  Total volume & -0.0003$ $(0.0005) \\
+  Previous delay (6 seconds) & -0.093^{**}$ $(0.034) \\
+  Previous delay (8 seconds) & -0.138^{**}$ $(0.040) \\
+  Previous delay (10 seconds) & -0.200^{**}$ $(0.055) \\
+  Previous response & 0.103^{**}$ $(0.016) \\
+\hline \\[-1.8ex]
+Observations & \multicolumn{1}{c}{3,693} \\
+R$^{2}$ &  \multicolumn{1}{c}{0.643} \\
+Adjusted R$^{2}$ & \multicolumn{1}{c}{0.636} \\
+\hline
+\hline \\[-1.8ex]
+\textit{Note:}  & \multicolumn{1}{r}{$^{*}$p$<$0.05; $^{**}$p$<$0.01} \\
+\end{tabular}
+\end{table}
+
+\end{document}

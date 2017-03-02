@@ -1,0 +1,7 @@
+"k3" "meanHR" "sdnn" "sdnni" "hfpowfft" "lfpowfft"
+"k3" NA 0.032 0.332 0.238 0.997 0.135
+"meanHR" 0.032 NA 0 0 0.005 0
+"sdnn" 0.332 0 NA 0 0 0
+"sdnni" 0.238 0 0 NA 0 0
+"hfpowfft" 0.997 0.005 0 0 NA 0
+"lfpowfft" 0.135 0 0 0 0 NA

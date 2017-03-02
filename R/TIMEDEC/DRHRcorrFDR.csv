@@ -1,0 +1,10 @@
+"meanDiff" "cvReproduction" "stevens1" "stevens2" "meanHR" "sdnn" "sdnni" "hfpowfft" "lfpowfft"
+"meanDiff" NA 0.565 0.012 0.061 0.65 0.919 0.949 0.904 0.719
+"cvReproduction" 0.949 NA 0 0 0.362 0.32 0.353 0.466 0.153
+"stevens1" 0.036 0 NA 0 0.65 0.076 0.059 0.109 0.033
+"stevens2" 0.151 0 0 NA 0.436 0.076 0.059 0.078 0.032
+"meanHR" 0.949 0.411 0.623 0.327 NA 0 0 0.01 0
+"sdnn" 0.949 0.411 0.076 0.061 0 NA 0 0 0
+"sdnni" 0.949 0.411 0.061 0.061 0 0 NA 0 0
+"hfpowfft" 0.949 0.466 0.094 0.061 0.01 0 0 NA 0
+"lfpowfft" 0.949 0.357 0.049 0.054 0 0 0 0 NA

@@ -1,0 +1,318 @@
+function [propBiased, optimality, dataMatrix, numMissed, regressionStats, tdFits] = dataAnalysis(participants, session)
+
+dataMatrix = [];
+regressionStats = struct;
+tdFits = struct;
+
+set(0,'DefaultAxesColorOrder', [0 0.447 0.741; 0.85 0.325 0.098]);
+
+c = 1; % Counter
+for x = participants
+    if x == 4 % Go to next participant if file is missing
+        continue;
+    end
+    oldcd = cd('C:\Users\bowenf\Documents\MATLAB\TIMEJUICE\EDT v6\data');
+    name = sprintf('%.0f_%.0f_*', x, session);
+    loadname = dir(name);
+    load(loadname.name,'data');
+    cd(oldcd);
+    
+    % Check optimality (TIMERR with ITI)
+    [~, empRewardDensity(c), ~, simRewardDensity(c)] = simulateTD(11.5,'timerr',x);
+    optimality(c,1) = empRewardDensity(c)/simRewardDensity(c);
+    
+    % Format variables from data
+    id(1:size(data.trialLog,2),1) = x;
+    trial = [1:size(data.trialLog,2)]';
+    dataMatrixIndividual = cat(2, [id],[trial],[data.trialLog.fA]',[data.trialLog.fD]',[data.trialLog.A]',[data.trialLog.D]',[data.trialLog.choice]',[data.trialLog.totalvolume]',[data.trialLog.choiceBias]');
+    
+    % Name variables and create new ones
+    ssA = dataMatrixIndividual(:,3);
+    ssD = dataMatrixIndividual(:,4);
+    llA = dataMatrixIndividual(:,5);
+    llD = dataMatrixIndividual(:,6);
+    choice = dataMatrixIndividual(:,7);
+    totalVolume = dataMatrixIndividual(:,8);
+    bias = dataMatrixIndividual(:,9);
+    
+    optimal = choice == bias;
+    sooner = choice == 1;
+    later = choice == 2;
+    missed = choice == 3;
+    predSooner = bias == 1;
+    predLater = bias == 2;
+    
+    for t = 1:size(dataMatrixIndividual,1)
+        if sooner(t)
+            cA(t,1) = ssA(t);
+            cD(t,1) = ssD(t);
+        elseif later(t)
+            cA(t,1) = llA(t);
+            cD(t,1) = llD(t);
+        elseif missed(t)
+            cA(t,1) = 0;
+            cD(t,1) = llD(t);
+        end
+        if predSooner(t)
+            pA(t,1) = ssA(t);
+            pD(t,1) = ssD(t);
+        elseif predLater(t)
+            pA(t,1) = llA(t);
+            pD(t,1) = llD(t);
+        end
+    end
+    
+    dataMatrixIndividual = cat(2,dataMatrixIndividual,[cA,cD,pA,pD,optimal]);
+    
+    % Remove missing and recode
+    dataMatrixIndividual(missed,:) = [];
+    fprintf('%.0f trials missed for participant %.0f.\n', sum(missed), x);
+    numMissed(c) = sum(missed);
+    
+    clearvars -except x session c optimality dataMatrix dataMatrixIndividual numMissed regressionStats tdFits propBiased
+    
+    trial = dataMatrixIndividual(:,2);
+    ssA = dataMatrixIndividual(:,3);
+    ssD = dataMatrixIndividual(:,4);
+    llA = dataMatrixIndividual(:,5);
+    llD = dataMatrixIndividual(:,6);
+    choice = dataMatrixIndividual(:,7);
+    totalVolume = dataMatrixIndividual(:,8);
+    bias = dataMatrixIndividual(:,9);
+    
+    optimal = choice == bias;
+    sooner = choice == 1;
+    later = choice == 2;
+    missed = choice == 3;
+    predSooner = bias == 1;
+    predLater = bias == 2;
+    
+    %% Plots for individual data
+    
+    % Binned choices
+    numBins = 4;
+    if mod(numel(choice), numBins) == 0
+        bins = reshape(choice,numel(choice)/numBins,numBins);
+        meanBin = nanmean(bins);
+    else
+        choice(end+1:end+(numBins-mod(numel(choice),numBins))) = NaN; % Add NaN until even
+        bins = reshape(choice,numel(choice)/numBins,numBins);
+        meanBin = nanmean(bins);
+    end
+    figure;
+    bar(meanBin);
+    ylim([1,2]);
+    title(sprintf('Participant %0.f, mean choices by bins',x));
+    
+    % Optimal over trial
+    figure;
+    bar(1:size(dataMatrixIndividual,1),+optimal,1);
+    title(sprintf('Participant %0.f, biased by trial number',x));
+    
+    % Binned optimal
+    numBins = 4;
+    optimal = +optimal; % Convert to numerical
+    if mod(numel(optimal), numBins) == 0
+        bins = reshape(optimal,numel(optimal)/numBins,numBins);
+        meanBin = nanmean(bins);
+    else
+        optimal(end+1:end+(numBins-mod(numel(optimal),numBins))) = NaN; % Add NaN until even
+        bins = reshape(optimal,numel(optimal)/numBins,numBins);
+        meanBin = nanmean(bins);
+    end
+    figure;
+    bar(meanBin);
+    title(sprintf('Participant %0.f, mean of biased choices by bins',x));
+    
+    % Remove NaN from variables
+    choice(isnan(choice)) = [];
+    optimal(isnan(optimal)) = [];
+    
+    propBiased(c) = mean(optimal);
+    
+    % Group plots (differences between biased and non-biased)
+    for t = 1:size(dataMatrixIndividual,1) % Create grouping string
+        if optimal(t) == 1
+            group{t,1} = 'Biased';
+        else
+            group{t,1} = 'Non-biased';
+        end
+    end
+    figure;
+    gscatter(trial,ssA,group);
+    figure;
+    gscatter(trial,llD,group);
+    figure;
+    gscatter(trial,choice,group);
+    figure;
+    gscatter(trial,totalVolume,group);
+    figure;
+    gscatter(ssA,llD,group);
+    
+    %% Regression
+    % Choice
+    predMatrix = [ssA,llA,llD];
+    [~,~,regressionStats(c).C] = glmfit(predMatrix,choice-1,'binomial');
+    % Choice with interaction
+    predMatrix = [ssA,llA,llD,ssA.*llD];
+    [~,~,regressionStats(c).CI] = glmfit(predMatrix,choice-1,'binomial');
+    % Choice with juice
+    predMatrix = [ssA,llA,llD,totalVolume];
+    [~,~,regressionStats(c).CJ] = glmfit(predMatrix,choice-1,'binomial');
+    % Optimal
+    predMatrix = [ssA,llA,llD];
+    [~,~,regressionStats(c).O] = glmfit(predMatrix,optimal,'binomial');
+    % Optimal with interaction
+    predMatrix = [ssA,llA,llD,ssA.*llD];
+    [~,~,regressionStats(c).OI] = glmfit(predMatrix,optimal,'binomial');
+    % Optimal with juice
+    predMatrix = [ssA,llA,llD,totalVolume];
+    [~,~,regressionStats(c).OJ] = glmfit(predMatrix,optimal,'binomial');
+    
+    %% TD fits (exponential)
+    [E, ~, ~] = fitTD(ssA, ssD, llA, llD, choice, 'exponential');
+    tdFits(c).beta = E(1);
+    tdFits(c).k = E(2);
+    
+    close all
+    
+    dataMatrix = cat(1,dataMatrix,dataMatrixIndividual);
+    clearvars -except x session c optimality dataMatrix numMissed regressionStats tdFits propBiased
+    c = c + 1; % Counter
+end
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%% Analysis of all participants
+% Recode variables
+trial = dataMatrix(:,2);
+ssA = dataMatrix(:,3);
+ssD = dataMatrix(:,4);
+llA = dataMatrix(:,5);
+llD = dataMatrix(:,6);
+choice = dataMatrix(:,7);
+totalVolume = dataMatrix(:,8);
+bias = dataMatrix(:,9);
+
+optimal = choice == bias;
+sooner = choice == 1;
+later = choice == 2;
+missed = choice == 3;
+predSooner = bias == 1;
+predLater = bias == 2;
+
+% Binned choices
+numBins = 4;
+if mod(numel(choice), numBins) == 0
+    bins = reshape(choice,numel(choice)/numBins,numBins);
+    meanBin = nanmean(bins);
+else
+    choice(end+1:end+(numBins-mod(numel(choice),numBins))) = NaN; % Add NaN until even
+    bins = reshape(choice,numel(choice)/numBins,numBins);
+    meanBin = nanmean(bins);
+end
+figure;
+bar(meanBin);
+ylim([1,2]);
+title('All participants, mean choices by bins');
+
+% Optimal over trial
+figure;
+bar(1:size(dataMatrix,1),+optimal,1);
+xlim([1,size(dataMatrix,1)]);
+title('All participants, biased choices by trial');
+
+% Binned optimal
+numBins = 4;
+optimal = +optimal; % Convert to numerical
+if mod(numel(optimal), numBins) == 0
+    bins = reshape(optimal,numel(optimal)/numBins,numBins);
+    meanBin = nanmean(bins);
+else
+    optimal(end+1:end+(numBins-mod(numel(optimal),numBins))) = NaN; % Add NaN until even
+    bins = reshape(optimal,numel(optimal)/numBins,numBins);
+    meanBin = nanmean(bins);
+end
+figure;
+bar(meanBin);
+title('All participants, mean biased choices by bins');
+
+% Remove NaN from variables
+choice(isnan(choice)) = [];
+optimal(isnan(optimal)) = [];
+
+% Group plots (differences between biased and non-biased)
+for t = 1:size(dataMatrix,1) % Create grouping string
+    if optimal(t)
+        group{t,1} = 'Biased';
+    else
+        group{t,1} = 'Non-biased';
+    end
+end
+
+for o = 1:2
+for t = 1:max(trial)
+   meanSSa(t,o) = mean(ssA(dataMatrix(:,2) == t & optimal == o-1));
+   meanLLd(t,o) = mean(llD(dataMatrix(:,2) == t & optimal == o-1));
+   meanChoice(t,o) = mean(choice(dataMatrix(:,2) == t & optimal == o-1));
+   meanTotalVolume(t,o) = mean(totalVolume(dataMatrix(:,2) == t & optimal == o-1));
+end
+end
+figure; 
+gscatter(trial,ssA,group,[0 0.447 0.741; 0.85 0.325 0.098]);
+hold on
+plot(1:max(trial),meanSSa(:,2));
+plot(1:max(trial),meanSSa(:,1));
+
+figure; 
+gscatter(trial,llD,group,[0 0.447 0.741; 0.85 0.325 0.098]);
+hold on
+plot(1:max(trial),meanLLd(:,2));
+plot(1:max(trial),meanLLd(:,1));
+
+figure; 
+gscatter(trial,choice,group,[0 0.447 0.741; 0.85 0.325 0.098]);
+hold on
+plot(1:max(trial),meanChoice(:,2));
+plot(1:max(trial),meanChoice(:,1));
+set(gcf,'Position', [680 558 1200 420])
+
+figure; 
+gscatter(trial,totalVolume,group,[0 0.447 0.741; 0.85 0.325 0.098]);
+hold on
+plot(1:max(trial),meanTotalVolume(:,2));
+plot(1:max(trial),meanTotalVolume(:,1));
+
+figure;
+scatter(meanSSa(:,2),meanLLd(:,2));
+hold on
+scatter(meanSSa(:,1),meanLLd(:,1));
+legend('Non-biased','Biased');
+title('ssA vs llD, ');
+
+%% Regression
+% Choice
+predMatrix = [ssA,llA,llD];
+[~,~,regressionStats(end+1).C] = glmfit(predMatrix,choice-1,'binomial');
+% Choice with interaction
+predMatrix = [ssA,llA,llD,ssA.*llD];
+[~,~,regressionStats(end).CI] = glmfit(predMatrix,choice-1,'binomial');
+% Choice with juice
+predMatrix = [ssA,llA,llD,totalVolume];
+[~,~,regressionStats(end).CJ] = glmfit(predMatrix,choice-1,'binomial');
+% Optimal
+predMatrix = [ssA,llA,llD];
+[~,~,regressionStats(end).O] = glmfit(predMatrix,optimal,'binomial');
+% Optimal with interaction
+predMatrix = [ssA,llA,llD,ssA.*llD];
+[~,~,regressionStats(end).OI] = glmfit(predMatrix,optimal,'binomial');
+% Optimal with juice
+predMatrix = [ssA,llA,llD,totalVolume];
+[~,~,regressionStats(end).OJ] = glmfit(predMatrix,optimal,'binomial');
+
+%% TD fits (exponential)
+[E, ~, ~] = fitTD(ssA, ssD, llA, llD, choice, 'exponential');
+tdFits(end+1).beta = E(:,1);
+tdFits(end).k = E(:,2);
+
+return
